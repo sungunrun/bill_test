@@ -35,21 +35,19 @@
         }
 }
 </script>
-
 {% endblock %}
 
 {% block body %}
 
+
 <div id="entry_container">
 
 <div id="index_info">
-
 <div id="entry_details">
 <h1>{{current_entry.entry_name}}</h1>
 <a href="/indiv_entry/{{current_entry.id-1}}">Previous entry</a>
 <a href="/">Entries list</a>
 <a href="/indiv_entry/{{current_entry.id+1}}">Next entry</a><br><br>
-
 <div class="seesnote">
     <i>see</i>: {{current_entry.see}}<br>
     <i>see also</i>: {{current_entry.seealso}}
