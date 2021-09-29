@@ -62,29 +62,38 @@ def render_page(page_number_current):
     highlights = text
 
     stokensstring = curr_entry.stokens
-    stokens = stokensstring.split(',')
-    for stoken in stokens:
-        repl = '( |\n|—|\.|\,)'
-        searchterm = re.sub('(_)', repl, stoken)
-        finds = re.finditer(searchterm, text, flags=re.IGNORECASE)
-        matchset = set()
-        for find in finds:
-            matchset.add(find.group())
-        for match in matchset:
-            text = re.sub(match, '<span style="background-color:yellow">'+match+"</span>", text)
-    # retokens = curr_entry.highlights.split('|')
-    # shighlight_list = []
-    # rehighlight_list = []
-    # for token in findtokens:
-    #     if token != '':
-    #         shighlight_list.append(token)
-    # for token in retokens:
-    #     if token!= '':
-    #         rehighlight_list.append(token)
-    # for elem in shighlight_list:
-    #     highlights = re.sub(re.escape(elem), '<span style="background-color:yellow">'+elem+'</span>', highlights, flags=re.IGNORECASE)
-    # for elem in rehighlight_list:
-    #     highlights = re.sub(re.escape(elem), '<span style="background-color:aqua">'+elem+'</span>', highlights)
+    if stokensstring != '':
+        stokens = stokensstring.split(',')
+        for stoken in stokens:
+            if stoken=='':
+                continue
+            repl = '( |\n|—|\.|\,)'
+            searchterm = re.sub('(_)', repl, stoken)
+            print(searchterm, file=sys.stderr)
+            finds = re.finditer(searchterm, highlights, flags=re.IGNORECASE)
+            matchset = set()
+            for find in finds:
+                matchset.add(find.group())
+            print(matchset, file=sys.stderr)
+            for match in matchset:
+                if '\n' in match:
+                    replacement = ''
+                    for component in match.split('\n'):
+                        if component=='':
+                            replacement = replacement+'\n'
+                        else:
+                            replacement = replacement + "<span style=\"background-color:yellow\">"+component+"</span>"
+                else:
+                    replacement = "<span style=\"background-color:yellow\">"+match+"</span>"
+                print(replacement, file=sys.stderr)
+                highlights = re.sub(re.escape(match), replacement, highlights, flags=re.IGNORECASE)
+    
+    retokensstring = curr_entry.highlights
+    if retokensstring != '':
+        retokens = retokensstring.split('|')
+        for retoken in retokens:
+            replacement = "<span style=\"background-color:aqua\">"+retoken+"</span>"
+            highlights = re.sub(re.escape(retoken), replacement, highlights)
     return highlights
     #return send_from_directory('static/page_contents', 'plaintext' + page_number + '.html')
 
@@ -152,13 +161,18 @@ def emph_subrange(emph_info):
         print(first)
         emphid = int(emphargs[3])
         current_entry = Entries.query.get_or_404(emphid)
-        current_entry.emphasized_subranges = current_entry.emphasized_subranges + ',' + first+'-'+second
+        if current_entry.emphasized_subranges == '':
+            current_entry.emphasized_subranges = current_entry.emphasized_subranges  + first+'-'+second + ','
+        else:
+            current_entry.emphasized_subranges = current_entry.emphasized_subranges + ',' + first+'-'+second
         if type(current_entry.range_dict)!=type({"a":"b"}):
             entryDict = json.loads(current_entry.range_dict)
         else:
             entryDict = current_entry.range_dict
         newEmphSRs = entryDict[pagearg]['emph_sr_strings']+','+first+'-'+second 
         entryDict[pagearg]['emph_sr_strings'] = newEmphSRs
+        if entryDict[pagearg]['isEdited']!='1':
+            entryDict[pagearg]['isEdited']='1'
         current_entry.range_dict = json.dumps(entryDict)
         db.session.commit()
         return newEmphSRs
@@ -173,23 +187,14 @@ def indiv_entry(id):
     retokens=retokens.split(',')
     retokens = [token for token in retokens if token!='']
     tokens = stokens + retokens
-    
-    subrangeDictTemp = {}
-    subrangeDictTemp['41-43'] = {}
-    subrangeDictTemp['41-43']['all_pages'] = [41,42,43,44,45,46,47,48,49,50]
-    subrangeDictTemp['41-43']['all_hits'] = [41,43,44,46,47,48,50,51,52,54,56,57]
-    subrangeDictTemp['41-43']['curr_srs'] = [[41,43],[45,47]]
-    subrangeDictTemp['41-43']['curr_sr_strings'] = '41-43,45-47'
-    subrangeDictTemp['41-43']['emph_srs'] = [[41,43]]
-    subrangeDictTemp['41-43']['emph_sr_strings'] = '50-52,53-57'
-    subrangeDictTemp['41-43']['removals'] = [41]
-    subrangeDictTemp['41-43']['isEdited'] = '1'
-    # ','.join([str(a)+'-'+str(b) for a,b in currDict['curr_subranges']])
-    if type(current_entry.range_dict)!=type({"a":"b"}):
-        entryDict = json.loads(current_entry.range_dict)
+    if current_entry.range_dict:
+        if type(current_entry.range_dict)!=type({"a":"b"}):
+            entryDict = json.loads(current_entry.range_dict)
+        else:
+            entryDict = current_entry.range_dict
+        subrangeDict = entryDict
     else:
-        entryDict = current_entry.range_dict
-    subrangeDict = entryDict
+        subrangeDict = {}
 
 
     if not current_entry.removals:
@@ -200,15 +205,8 @@ def indiv_entry(id):
         emphases = []
     else:
         emphases = current_entry.emphasized_pages.split(',')
-    if request.method == 'POST':
-        if request.form['reqtype']=='subrange':
-            first = request.form['firstpage']
-            second = request.form['secondpage']
-            current_entry.emphasized_subranges = first+'-'+second
-            db.session.commit()
-            return redirect(request.referrer)
-    else:    
-        return render_template('entrypage2_test.html', subrangeDict=subrangeDict, tokens=tokens, current_entry=current_entry, emphases=emphases, removals=removals)
+
+    return render_template('entrypage2_test.html', subrangeDict=subrangeDict, tokens=tokens, current_entry=current_entry, emphases=emphases, removals=removals)
 
 
 if __name__ == "__main__":

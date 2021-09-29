@@ -26,7 +26,9 @@
     function updateEmph(elem) {
         $.post("/emph_subrange/" + $("#form"+$(elem).attr("name")).serialize()+"&{{current_entry.id}}", function(data){
             $("#emphsrs"+$(elem).attr("name")).text(data);
-        } )
+        } );
+        $("#form"+$(elem).attr("name")).trigger("reset");
+        $("#pgbtn"+$(elem).attr("name")).attr('style', 'color:green');
 
     }
 </script>
@@ -34,7 +36,10 @@
     function rangeRemove(elem) {
         $.post("/rangeremove/" + $(elem).attr("name"), function(data){
             $("#hit"+data).attr('style','color:red');
+            $("#pgbtn"+$(elem).attr("name")).attr('style', 'color:red');
         });
+        $("#pgbtn"+$(elem).attr("id")).attr('style', 'color:green');
+
     }
 </script>
 <script type=text/javascript>
@@ -97,7 +102,7 @@
             {% if page in emphases %}
             {% set style='font-style:italic'%}
             {% endif %}
-            {% if '41-' in page %}
+            {% if '-' in page %}
             {% set currDict = subrangeDict[page] %}
             {% if currDict['isEdited']=='1'%}
             {% set style='color:green' %}
@@ -128,7 +133,7 @@
                         </form>
                     </div>
                     <div class="subrange_pages">
-                        {% if '41-' in page %}
+                        {% if '-' in page %}
                         {% set currDict = subrangeDict[page] %}
                         {% for hit in currDict['all_hits'] %}
                         {% set style_rmv = 'color:black' %}
@@ -136,7 +141,7 @@
                         {% set style_rmv = 'color:red'%}
                         {% endif %}
                         <span id="hit{{hit}}" style={{style_rmv}}>{{hit}}</span>
-                        <a href=# name="rangeremove:{{current_entry.id}}_{{page}}_{{hit}}" onclick="rangeRemove(this)" style="font-size:medium">Remove</button></a><br>
+                        <a href=# name="rangeremove:{{current_entry.id}}_{{page}}_{{hit}}" id={{page}} onclick="rangeRemove(this)" style="font-size:medium">Remove</button></a><br>
                         {% endfor %}
                         {% endif %}
                     </div>

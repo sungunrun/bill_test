@@ -1,0 +1,56 @@
+<script type=text/javascript>
+    function myFunction(elem) {
+        $("#num8").css("background-color", "white");
+        var id = "tools"+$(elem).attr("id");
+        var x = document.getElementById(id);
+        if (x.style.display === "none") {
+            x.style.display = "none";
+        } 
+        else {
+            x.style.display = "none";
+        }
+        }
+}
+
+
+
+
+
+
+x = $("#cont"+$(elem).attr("name")).css("height");
+        alert(x);
+        if (x == '54px') {
+            $("#cont"+$(elem).attr("name")).css("height", "100px");
+            alert("Done.")
+        }
+        if (x == '100px') {
+            $("#cont"+$(elem).attr("name")).css("height", "54px");
+            alert("Done2.")
+        }    
+
+
+
+
+
+
+
+
+
+        <div class="subrange_tools_container" id="tools{{page}}" style="display:none">
+                    <div class="subrange_info">
+                        <b>Current subranges:</b> (Under construction)<br>
+                        <b>Emphasized subranges:</b> <i>{{emph_sr}}</i><br>
+                        <form action="/emph_subrange/{{current_entry.id}}" onsubmit="return update_emph_sr(this)"  id="form{{page}}" method="POST">
+                            <input type="hidden" name="pageToEmph" value="{{page}}">
+                            <span style="font-size: medium"><b>Emphasize</b></span>
+                            <span style="font-size: medium" >from </span> <input type="text" name="firstpage" style="width:30px">
+                            <span style="font-size: medium">to </span><input type="text" name="secondpage" style="width:30px">
+                           <button type="submit" id="submit_subrange" name="submit_sr">Submit</button>
+                        </form>
+                    </div>
+
+
+                    $.post("/emph_subrange/" + "{{current_entry.id}}" + ',' + );
+        alert("Hello");
+        $("#form8").trigger("reset");
+        return false;

@@ -3,8 +3,9 @@ body {
     position: relative;
     margin:0;
    }
-   
-   .container {
+   /*margin 50*/ 
+
+.container {
      height: 100vh;
      width: 100vw;
      display: grid;
@@ -13,6 +14,8 @@ body {
      position:relative;
    }
    
+
+
    .reader_block {
     display: grid;
     grid-template-columns: 1fr;
@@ -34,8 +37,13 @@ body {
         border-bottom: 1px solid lightgrey;
         overflow-y:scroll;
         padding: 20px;
+        font-family: Serif;
+        font-size: 12pt;
+        /* margin-right: 15px; */
    }
    
+
+
    .entry_info {
      display: grid;
      grid-template-rows: 40% 60%;
@@ -78,6 +86,8 @@ body {
    .page_numbers{
        background-color: red;
    }
+   /* font x-large for relevant section in main.css original */
+
    .page_buttons{
        background-color: aqua;
    }
@@ -101,3 +111,43 @@ body {
        padding: 0px;
        margin: 0px;
    }
+
+   .seesnote{
+    font-size: large;
+  }
+
+  #page_link {
+    font-size: x-large;
+  }
+
+
+
+
+  #PGHEADER {
+    font-family: Sans-Serif;
+    font-size: 105%;
+    letter-spacing: normal;
+    line-height: 100%;
+    padding-bottom: 5px;
+  }
+
+  #FOOTNOTES {
+    font-family: Sans-Serif;
+    font-size: 85%;
+    letter-spacing: normal;
+    line-height: 100%;
+  }
+
+  #CHTITLE {
+    font-family: Sans-Serif;
+    font-size: 140%;
+    letter-spacing: normal;
+    line-height: 100%;
+  }
+
+  #SUBSECTITLE {
+    font-family: Sans-Serif;
+    font-size: 110%;
+    letter-spacing: normal;
+    line-height: 100%;
+  }
