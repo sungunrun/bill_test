@@ -67,6 +67,8 @@ def render_page(page_number_current):
         for stoken in stokens:
             if stoken=='':
                 continue
+            print("NEW LOOP", file=sys.stderr)
+
             repl = '( |\n|—|\.|\,)'
             searchterm = re.sub('(_)', repl, stoken)
             print(searchterm, file=sys.stderr)
@@ -75,28 +77,30 @@ def render_page(page_number_current):
             for find in finds:
                 matchset.add(find.group())
             print(matchset, file=sys.stderr)
-            for match in matchset:
-                if '\n' in match:
-                    replacement = ''
-                    for component in match.split('\n'):
-                        if component=='':
-                            replacement = replacement+'\n'
-                        else:
-                            replacement = replacement + "<span style=\"background-color:yellow\">"+component+"</span>"
-                else:
-                    replacement = "<span style=\"background-color:yellow\">"+match+"</span>"
-                print(replacement, file=sys.stderr)
-                highlights = re.sub(re.escape(match), replacement, highlights, flags=re.IGNORECASE)
+            if len(matchset) > 0:
+                for match in matchset:
+                    if '\n' in match:
+                        replacement = ''
+                        for component in match.split('\n'):
+                            if component=='':
+                                replacement = replacement+'\n'
+                            else:
+                                replacement = replacement + "<span style=\"background-color:yellow\">"+component+"</span>"
+                    else:
+                        replacement = "<span style=\"background-color:yellow\">"+match+"</span>"
+                    print(repr(replacement), file=sys.stderr)
+                    highlights = re.sub(re.escape(match), replacement, highlights, flags=re.IGNORECASE)
     
     retokensstring = curr_entry.highlights
     if retokensstring != '':
         retokens = retokensstring.split('|')
         for retoken in retokens:
-            replacement = "<span style=\"background-color:aqua\">"+retoken+"</span>"
-            highlights = re.sub(re.escape(retoken), replacement, highlights)
+            replacement2 = "<span style=\"background-color:aqua\">"+retoken+"</span>"
+            highlights = re.sub(re.escape(retoken), replacement2, highlights)
     return highlights
     #return send_from_directory('static/page_contents', 'plaintext' + page_number + '.html')
 
+#REMOVE INDIVIDUAL PAGES
 @app.route('/remove/<int:id>', methods=['POST','GET'])
 def remove(id):
     current_entry = Entries.query.get_or_404(id)
@@ -109,6 +113,7 @@ def remove(id):
         db.session.commit()
         return redirect('/')
 
+#EMPHASIZE INDIVIDUAL PAGES
 @app.route('/emphasize/<int:id>', methods=['POST','GET'])
 def emphasize(id):
     current_entry = Entries.query.get_or_404(id)
@@ -121,6 +126,7 @@ def emphasize(id):
         db.session.commit()
         return redirect('/')
 
+#GET PAGE HEIGHT
 @app.route('/getheight/<height_string>', methods=['POST','GET'])
 def getheight(height_string):
     height = int(height_string[:-2])
@@ -131,6 +137,7 @@ def getheight(height_string):
     elif height > 100:
         return "large"
 
+#REMOVE PAGE FROM RANGE
 @app.route('/rangeremove/<removal_info>', methods=['POST','GET'])
 def rangeremove(removal_info):
     rmvargs = removal_info.split(':')[1]
@@ -158,9 +165,12 @@ def emph_subrange(emph_info):
         pagearg = emphargs[0].split('=')[1]
         first = emphargs[1].split('=')[1]
         second = emphargs[2].split('=')[1]
-        print(first)
+        print(type(first))
+        print(type(second))
         emphid = int(emphargs[3])
         current_entry = Entries.query.get_or_404(emphid)
+        if not current_entry.emphasized_subranges:
+            current_entry.emphasized_subranges = ''
         if current_entry.emphasized_subranges == '':
             current_entry.emphasized_subranges = current_entry.emphasized_subranges  + first+'-'+second + ','
         else:
@@ -206,7 +216,7 @@ def indiv_entry(id):
     else:
         emphases = current_entry.emphasized_pages.split(',')
 
-    return render_template('entrypage2_test.html', subrangeDict=subrangeDict, tokens=tokens, current_entry=current_entry, emphases=emphases, removals=removals)
+    return render_template('entry_page.html', subrangeDict=subrangeDict, tokens=tokens, current_entry=current_entry, emphases=emphases, removals=removals)
 
 
 if __name__ == "__main__":
